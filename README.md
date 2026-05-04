@@ -2,7 +2,7 @@
 Clone the repository:
 
 Bash
-git clone [https://github.com/YourUsername/LAN_CHATAPP.git](https://github.com/Sorrow01001000/LAN_CHATAPP.git)
+git clone [https://github.com/Sorrow01001000/LAN_CHATAPP.git](https://github.com/Sorrow01001000/LAN_CHATAPP.git)
 cd LAN_CHATAPP
 Verify your dependencies: Make sure IUP, luasocket, and sqlite3 are properly linked to your Lua path.
 

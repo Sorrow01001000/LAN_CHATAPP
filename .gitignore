@@ -1,0 +1,10 @@
+# Ignore the SQLite database
+*.db
+lan_chat.db
+
+# Ignore compiled Lua files
+*.luac
+
+# Ignore OS hidden files
+.DS_Store
+Thumbs.db

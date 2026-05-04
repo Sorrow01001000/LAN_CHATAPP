@@ -11,6 +11,7 @@ Run the App:
 Bash
 lua Main.lua
 
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 🎮 How to Use
 Launch & Login: Open the app and enter a nickname to log in.
 
@@ -22,6 +23,7 @@ Connect: Click your friend's name in the saved list.
 
 Chat: Click Connect & Chat to open the chat window and start sending messages!
 
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 🛠️ Troubleshooting
 "I send a message, but nothing happens / Network Error."
 
@@ -31,6 +33,7 @@ Wrong IP: Double-check that the "Target IP" in the chat screen matches your frie
 
 Same Network: Ensure both computers are connected to the same Wi-Fi or router subnet.
 
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 📂 Project Structure
 Main.lua - The core GUI setup, screen routing, and user interaction logic.
 

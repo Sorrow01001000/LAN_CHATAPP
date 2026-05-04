@@ -12,6 +12,32 @@ db:execute[[
   );
 ]]
 
+db:execute[[
+  CREATE TABLE IF NOT EXISTS servers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    ip TEXT UNIQUE
+  );
+]]
+
+function M.add_server(name, ip)
+    db:execute(string.format("INSERT OR IGNORE INTO servers (name, ip) VALUES ('%s', '%s')", name, ip))
+end
+
+function M.get_servers()
+    local cursor = db:execute("SELECT name, ip FROM servers")
+    local list = {}
+    if cursor then
+        local row = cursor:fetch({}, "a")
+        while row do
+            table.insert(list, {name = row.name, ip = row.ip})
+            row = cursor:fetch(row, "a")
+        end
+        cursor:close()
+    end
+    return list
+end
+
 function M.save_message_to_db(user, msg)
     local clean_msg = msg:gsub("'", "''")
     db:execute(string.format(

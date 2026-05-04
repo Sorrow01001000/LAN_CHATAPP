@@ -1,6 +1,16 @@
 local iup =require("iuplua")
 local db_manager = require("db_manager")
 local net = require("network")
+local socket = require("socket")
+
+function get_my_ip()
+    local s = socket.udp()
+    local ok = s:setpeername("8.8.8.8", 80)
+    if not ok then return "127.0.0.1" end
+    local ip = s:getsockname()
+    s:close()
+    return ip
+end
 
 net.start_server()
 
@@ -18,36 +28,48 @@ local screen_login = iup.vbox{
     alignment="ACENTER" ,gap="10", margin="20x20"
 }
 
--- ROOMS
+-- Contacts
 local list_contacts = iup.list{expand="YES"}
+local txt_friend_name = iup.text{placeholder="Friend's Name", expand="HORIZONTAL"}
+local txt_friend_ip = iup.text{placeholder="192.168.1.X", expand="HORIZONTAL"}
+local btn_add_server = iup.button{title="Save to Server List", expand="HORIZONTAL"}
+
 local screen_contacts = iup.vbox{
-    iup.label{title="Active Users on LAN",font="Arial , Bold 12"},
+    iup.label{title="Saved Servers", font="Arial, Bold 12"},
     list_contacts,
-    iup.button{title="Join Selected Chat", expand="HORIZONTAL"},
-    margin="10x10",gap="5"
+    iup.label{title="Add New Friend:"},
+    txt_friend_name,
+    txt_friend_ip,
+    btn_add_server,
+    iup.button{title="Connect & Chat", expand="HORIZONTAL", action=function() show_screen(3) end},
+    margin="10x10", gap="5"
 }
 
 --CHAT WINDOW
 local chat_display = iup.text{multiline="YES", readonly="YES",expand="YES",font="Courier, 10"}
 local chat_input = iup.text{expand="HORIZONTAL"}
 local btn_send = iup.button{title="Send", size="50x"}
+local lbl_chat_title = iup.label{title="Select a friend to start chatting", font ="Arial, Bold 12"}
 
 local text_ip = iup.text{value="127.0.0.1", size="100x"}
 
 local screen_chat = iup.vbox{
+    lbl_chat_title,
     iup.hbox{iup.label{title="Target IP:"},text_ip},
-    iup.label{title="Chatting with: Room 1 ", font ="Arial , Bold 12"},
     chat_display,
     iup.hbox{chat_input,btn_send,gap="5"},
     margin="10x10", gap="5"
 }
 
 --PROFILE
+local lbl_my_nick = iup.label{title="Your Nickname: Not set"}
+
 local screen_profile = iup.vbox{
-    iup.label{title="User Profile", font="Arial , Bold 12"},
-    iup.label{title="Change Status:"},
-    iup.text{value="Available", expand="HORIZONTAL"},
-    iup.button{title="Save Changes"},
+    iup.label{title="User Profile", font="Arial , Bold 14"},
+    lbl_my_nick,
+    iup.label{title="Your LAN IP Adress: ", font="Arial , Bold 10"},
+    iup.label{title=get_my_ip(),fgcolor="0 0 255"},
+    iup.label{"Share this IP with your friends so they can chat with you."},
     margin="10x10", gap="10"
 }
 
@@ -71,6 +93,7 @@ local screen_contanier = iup.zbox{
 -- -------------------------------------------------------END OF GUI------------------------------------------------------------
 -- ---------------------------------------------------START OF FUNCTIONS------------------------------------------------------------
 
+
 function show_screen(index)
     screen_contanier.value= screen_contanier[index]
 
@@ -81,15 +104,47 @@ function show_screen(index)
     end
 end
 
+function btn_add_server:action()
+    if txt_friend_name.value ~= "" and txt_friend_ip.value ~= "" then
+        db_manager.add_server(txt_friend_name.value, txt_friend_ip.value)
+        update_server_list_ui()
+        txt_friend_name.value = ""
+        txt_friend_ip.value = ""
+    end
+end
+
+function update_server_list_ui()
+    list_contacts.removeitem = "ALL"
+    local servers = db_manager.get_servers()
+    if #servers==0 then
+        print("Debug: No servers found in database.")
+    end
+    for i, s in ipairs(servers) do
+        list_contacts[i] = s.name .. " (" .. s.ip .. ")"
+    end
+end
+
+function list_contacts:action(text, item, state)
+    if state == 1 then 
+        local name, ip = text:match("(.+) %((.-)%)")
+        if ip and name then
+            text_ip.value = ip
+            lbl_chat_title.title= "Chatting with: " .. name .."(" .. ip ..")"
+        end
+    end
+end
+
 function btn_login:action()
     if txt_username.value ~= "" then
-    print("Logging in as: " .. txt_username.value)
-    state.title="Status: Online"
-    state.fgcolor= "0 155 0"
-    show_screen(2)
+        lbl_my_nick.title="Your Nickname: " .. txt_username.value
+        state.title="Status: Online"
+        state.fgcolor= "0 155 0"
+        update_server_list_ui()
+        show_screen(2)
     else
         iup.Message("Login Error", "Please enter a username first!")
     end
+    return iup.DEFAULT
 end
 
 function btn_send:action()

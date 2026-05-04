@@ -1,6 +1,6 @@
 local iup =require("iuplua")
 local db_manager = require("db_manager")
-local net = require("net_manager")
+local net = require("network")
 
 net.start_server()
 
